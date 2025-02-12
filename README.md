@@ -36,7 +36,7 @@ mvn install
 Move the generated JAR file to a shared folder for easy access:
 
 ```bash
-mv target/*.jar shared-folder/input/code/
+mv target/WordCountUsingHadoop-0.0.1-SNAPSHOT.jar shared-folder/input/data/
 ```
 
 ### 4. **Copy JAR to Docker Container**
@@ -44,7 +44,7 @@ mv target/*.jar shared-folder/input/code/
 Copy the JAR file to the Hadoop ResourceManager container:
 
 ```bash
-docker cp shared-folder/input/code/<your-jar-file>.jar resourcemanager:/opt/hadoop-3.2.1/share/hadoop/mapreduce/
+docker cp shared-folder/input/data/WordCountUsingHadoop-0.0.1-SNAPSHOT.jar resourcemanager:/opt/hadoop-3.2.1/share/hadoop/mapreduce/
 ```
 
 ### 5. **Move Dataset to Docker Container**
@@ -88,7 +88,7 @@ hadoop fs -put ./input.txt /input/dataset
 Run your MapReduce job using the following command:
 
 ```bash
-hadoop jar /opt/hadoop-3.2.1/share/hadoop/mapreduce/<your-jar-file>.jar com.example.controller.Controller /input/dataset/input.txt /output
+hadoop jar /opt/hadoop-3.2.1/share/hadoop/mapreduce/WordCountUsingHadoop-0.0.1-SNAPSHOT.jar com.example.controller.Controller /input/dataset/input.txt /output
 ```
 
 ### 9. **View the Output**
@@ -116,3 +116,39 @@ To copy the output from HDFS to your local machine:
     docker cp resourcemanager:/opt/hadoop-3.2.1/share/hadoop/mapreduce/output/ shared-folder/output/
     ```
 3. Commit and push to your repo so that we can able to see your output
+
+## Challenges faced and Solutions
+##### 1. Challenge:
+The hadoop jar command fails with an error like "ClassNotFoundException: com.example.Controller".
+##### Solution:
+Ensure that your JAR file contains the compiled class files for Controller, WordMapper, and WordReducer.
+If missing, rebuild your project using Maven: mvn clean package
+
+##### 2.Challenge:
+Unable to connect to the ResourceManager container due to an incorrect or missing container name.
+##### Solution:
+Use docker ps to check the exact container name before running: docker exec -it resourcemanager /bin/bash
+
+##### 3.Challenge:
+HDFS operations such as directory creation or file copying fail with errors like "No such file or directory" or "Permission denied".
+##### Solution:
+Ensure that HDFS is running correctly by executing:hadoop fs -ls /
+
+## Sample Input & Output
+
+#### Input Format:
+Hello world
+Hello Hadoop
+Hadoop is powerful
+Hadoop is used for big data
+
+#### Expected Output:
+Hadoop 3
+Hello 2
+is 2
+used 1
+for 1
+big 1
+data 1
+powerful 1
+world 1
